@@ -77,6 +77,7 @@ public class GameManager : MonoBehaviour
         
         if(GameOverCamera != null) GameOverCamera.SetActive(false);
         if(MainCamera != null) MainCamera.SetActive(true);
+        if (BigScreenManager.Instance != null) BigScreenManager.Instance.SetupScreen(settings.Mines);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;

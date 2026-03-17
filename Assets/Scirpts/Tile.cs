@@ -17,6 +17,10 @@ public class Tile : MonoBehaviour
     [Header("Cấu hình hiển thị")]
     public TextMeshPro NumberText; 
     
+    [Header("Cấu hình Model 3D")]
+    public GameObject FlagObject; // Model Cờ
+    public GameObject MineObject; // Model Bom
+
     private GridManager grid;
     private Renderer rend;
 
@@ -28,12 +32,12 @@ public class Tile : MonoBehaviour
 
     public void Setup(int x, int y, GridManager g)
     {
-        X = x;
-        Y = y;
-        grid = g;
-        IsMine = false;
-        Revealed = false;
-        Flagged = false;
+        X = x; Y = y; grid = g;
+        IsMine = false; Revealed = false; Flagged = false;
+
+        // Tắt cả cờ và bom khi tạo map mới
+        if (FlagObject != null) FlagObject.SetActive(false); 
+        if (MineObject != null) MineObject.SetActive(false); 
     }
 
     public void SetMine() => IsMine = true;
@@ -41,18 +45,14 @@ public class Tile : MonoBehaviour
     public void SetHighlight(bool active)
     {
         if (Revealed) return;
-
-        if (active)
-            rend.material.color = Flagged ? Color.blue : Color.white;
-        else
-            rend.material.color = Flagged ? Color.blue : Color.gray; // Cờ nên màu Blue để tránh nhầm với Bom (Red)
+        if (active) rend.material.color = Color.white;
+        else rend.material.color = Color.gray; 
     }
 
     public void Reveal()
     {
         if (Revealed || Flagged) return;
 
-        // Phát nhấn đầu tiên kích hoạt rải bom
         if (!GameManager.Instance.FirstClick)
         {
             GameManager.Instance.FirstClick = true;
@@ -63,7 +63,11 @@ public class Tile : MonoBehaviour
 
         if (IsMine)
         {
-            rend.material.color = Color.red; // Bom nổ màu đỏ
+            // DẪM TRÚNG BẰNG CHÍNH ĐÔI CHÂN CỦA BẠN: Tô đỏ và hiện mìn
+            rend.material.color = Color.red; 
+            if (MineObject != null) MineObject.SetActive(true);
+            if (FlagObject != null) FlagObject.SetActive(false);
+            
             GameManager.Instance.EndGame(false);
             return;
         }
@@ -88,54 +92,61 @@ public class Tile : MonoBehaviour
 
     public void ToggleFlag()
     {
-        if (Revealed) return;
+        if (Revealed) return; 
+        
         Flagged = !Flagged;
-        rend.material.color = Flagged ? Color.blue : Color.gray; 
+        if (FlagObject != null) FlagObject.SetActive(Flagged);
+
+        // Kích hoạt thay đổi số trên màn hình lớn (nếu có)
+        if (BigScreenManager.Instance != null) BigScreenManager.Instance.AddFlag(Flagged);
     }
 
-    // Cập nhật bảng màu từ 1 đến 8 cho chuyên nghiệp
     private Color GetNumberColor(int num)
     {
-        switch (num)
-        {
+        switch (num) {
             case 1: return Color.blue;
-            case 2: return new Color(0, 0.5f, 0); // Xanh lá
+            case 2: return new Color(0, 0.5f, 0); 
             case 3: return Color.red;
-            case 4: return new Color(0, 0, 0.5f); // Xanh dương đậm
-            case 5: return new Color(0.5f, 0, 0); // Đỏ đậm
-            case 6: return new Color(0, 0.5f, 0.5f); // Cyan đậm
+            case 4: return new Color(0, 0, 0.5f); 
+            case 5: return new Color(0.5f, 0, 0); 
+            case 6: return new Color(0, 0.5f, 0.5f); 
             case 7: return Color.black;
             case 8: return Color.gray;
             default: return Color.black;
         }
     }
 
-    // Hàm này chỉ để hiện quả bom lên mà không chạy logic thua cuộc
-    public void RevealAsMine(bool isWin)
+    // ĐỔI TÊN HÀM: Xử lý trạng thái khi Game Over
+    public void HandleGameOver(bool isWin)
     {
-        if (IsMine && !Revealed)
+        if (isWin)
         {
-            Revealed = true;
-            
-            if (isWin)
+            // THẮNG: Lấp đầy cờ vào các ô bom chưa mở
+            if (IsMine && !Revealed)
             {
-                // Nếu THẮNG: Đổi sang màu Xanh dương (màu cờ) và hiện chữ F
-                rend.material.color = Color.blue;
+                Revealed = true;
+                if (FlagObject != null) FlagObject.SetActive(true);
             }
-            else
+        }
+        else
+        {
+            // THUA: Có 3 trường hợp
+            if (IsMine && !Flagged && !Revealed)
             {
-                // Nếu THUA: Đổi sang màu Đỏ và hiện chữ X
+                // 1. Ô có bom mà chưa tìm ra -> Hiện bom lên
+                Revealed = true;
+                if (MineObject != null) MineObject.SetActive(true);
+            }
+            else if (!IsMine && Flagged)
+            {
+                // 2. KHÔNG có bom nhưng lại cắm cờ -> CẮM SAI
+                // Đổi nền thành đỏ, cờ vẫn giữ nguyên
                 rend.material.color = Color.red;
-                if (NumberText != null) 
-                {
-                    NumberText.text = "X"; 
-                    NumberText.color = Color.black;
-                }
             }
+            // 3. Có bom và cắm đúng cờ -> Cờ giữ nguyên, không làm gì cả
         }
     }
 
-    // Các hàm kiểm tra trạng thái cho Script khác dùng
     public bool IsRevealed() => Revealed;
     public bool IsFlagged() => Flagged;
     public Vector2 GridPosition => new Vector2(X, Y);

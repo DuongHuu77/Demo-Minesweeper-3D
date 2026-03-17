@@ -82,16 +82,16 @@ public class GridManager : MonoBehaviour
         if (revealed >= safeTiles) GameManager.Instance.EndGame(true);
     }
 
-    public void RevealAllMines(bool isWin)
+    public void RevealAllMines(bool win)
     {
         if (grid == null) return;
-
+        
         foreach (Tile t in grid)
         {
-            if (t != null && t.IsMine)
+            if (t != null) 
             {
-                // Truyền trạng thái Thắng/Thua vào từng ô gạch
-                t.RevealAsMine(isWin);
+                // GỌI CHO TẤT CẢ CÁC Ô, THAY VÌ CHỈ Ô CÓ BOM NHƯ TRƯỚC
+                t.HandleGameOver(win);
             }
         }
     }

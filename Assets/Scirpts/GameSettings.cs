@@ -21,7 +21,7 @@ public class GameSettings
         new GameSettings(16,16,40);
 
     public static GameSettings Expert =
-        new GameSettings(30,16,99);
+        new GameSettings(24,20,99);
     
     public static GameSettings SelectedMode = Beginner; 
 }
