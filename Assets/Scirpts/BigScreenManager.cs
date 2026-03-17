@@ -47,7 +47,7 @@ public class BigScreenManager : MonoBehaviour
         if (MineCounterText != null)
         {
             int remaining = totalMines - flagsPlaced;
-            MineCounterText.text = "Mines: " + remaining.ToString();
+            MineCounterText.text = remaining.ToString();
         }
     }
 
@@ -57,7 +57,7 @@ public class BigScreenManager : MonoBehaviour
         {
             int minutes = Mathf.FloorToInt(timer / 60F);
             int seconds = Mathf.FloorToInt(timer - minutes * 60);
-            TimerText.text = string.Format("Time: {0:00}:{1:00}", minutes, seconds);
+            TimerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
         }
     }
 }
