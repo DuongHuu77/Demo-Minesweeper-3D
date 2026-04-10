@@ -15,7 +15,7 @@ public class GameSettings
     }
 
     public static GameSettings Beginner =
-        new GameSettings(9,9,10);
+        new GameSettings(9, 9, 10);
 
     public static GameSettings Intermediate =
         new GameSettings(16,16,40);

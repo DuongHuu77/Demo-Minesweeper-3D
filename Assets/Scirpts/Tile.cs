@@ -45,7 +45,7 @@ public class Tile : MonoBehaviour
     public void SetHighlight(bool active)
     {
         if (Revealed) return;
-        if (active) rend.material.color = Color.white;
+        if (active) rend.material.color = Color.blue;
         else rend.material.color = Color.gray; 
     }
 
